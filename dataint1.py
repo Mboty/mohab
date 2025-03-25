@@ -24,14 +24,22 @@ mysql = MySQL(app)
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get('x-access-token')
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 403
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'message': 'Authorization header is missing!'}), 403
+        
+        # Expect "Bearer <token>"
+        parts = auth_header.split()
+        if parts[0].lower() != 'bearer' or len(parts) != 2:
+            return jsonify({'message': 'Invalid Authorization header format!'}), 403
+        
+        token = parts[1]
         try:
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
             current_user = data['username']
         except:
             return jsonify({'message': 'Token is invalid or expired!'}), 403
+        
         return f(current_user, *args, **kwargs)
     return decorated
 
@@ -163,4 +171,4 @@ def delete_product(current_user, product_id):
     return jsonify({'message': 'Product deleted'})
 
 if __name__ == '__main__':
-    app.run(debug=True)  # Running with HTTP
+    app.run(debug=True)
