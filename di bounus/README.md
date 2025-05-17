@@ -8,7 +8,6 @@ This project demonstrates **Message Authentication Code (MAC)** forgery attempts
 ```
 .
 ├── client.py        # Simulates an attacker forging a message and recomputing the MAC
-├── clent1.py        # Simulates a server generating/verifying MAC and an attacker reusing a MAC
 ├── server.py        # (Expected) Insecure MAC implementation using MD5
 ├── secureserver.py  # (Expected) Secure MAC generation and verification logic
 ```
@@ -29,7 +28,7 @@ This project highlights the weakness of using simple concatenation in MACs:
   - Recomputes the MAC using the secret key (for demonstration purposes).
   - Demonstrates what would happen if an attacker could guess or calculate a valid MAC.
 
-### `clent1.py`
+### `secureserver.py`
 - Simulates:
   - A server verifying a legitimate MAC.
   - An attacker reusing the same MAC after appending data (`&admin=true`), **without** access to the key.
@@ -59,7 +58,7 @@ Make sure all files (including `server.py` or `secureserver.py`) are in the same
 
 Run the legitimate server simulation and attack reuse test:
 ```bash
-python clent1.py
+python secureserver.py
 ```
 
 Run the direct MAC forgery simulation:
