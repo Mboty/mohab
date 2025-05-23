@@ -14,7 +14,7 @@ This project demonstrates the difference between a **naive MAC implementation** 
 
 ---
 
-## ⚙️ Requirements
+## Requirements
 
 - Python 3.x
 - `hashpumpy` module  
@@ -23,7 +23,7 @@ This project demonstrates the difference between a **naive MAC implementation** 
   ```bash
   pip install hashpumpy
 
-🧪 How to Run the Demo
+ How to Run the Demo
 1. Run the Naive Server
 
 Start the naive server:
