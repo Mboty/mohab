@@ -1,49 +1,41 @@
-import hashlib
+import hashpumpy
+import os
 
-from server import verify, SECRET_KEY
-# Attacker DOES NOT KNOW SECRET_KEY, but here for demo we set length:
-SECRET_KEY_LENGTH = 14  # length of b'supersecretkey' (attacker's guess)
-
-def md5_padding(message_length: int) -> bytes:
-    """Generate MD5 padding for a message of message_length bytes."""
-    ml_bits = message_length * 8
-    padding = b'\x80'
-    pad_len = (56 - (message_length + 1) % 64) % 64
-    padding += b'\x00' * pad_len
-    padding += ml_bits.to_bytes(8, byteorder='little')
-    return padding
-
-def perform_length_extension_attack():
-    print("=== Length Extension Attack Demo ===")
-    print("Attempting length extension attack on unknown secret key...\n")
-
-    original_message = b"amount=100&to=alice"
-    original_mac = hashlib.md5(SECRET_KEY + original_message).hexdigest()
-
-    print("Original message:", original_message)
-    print("Original MAC:", original_mac)
-
+def perform_attack():
+    intercepted_message = b"amount=100&to=alice"
+    intercepted_mac = input("Enter intercepted MAC (hex string from server): ").strip()
     data_to_append = b"&admin=true"
-    print(f"\nAttacker wants to append: {data_to_append}")
 
-    secret_len = SECRET_KEY_LENGTH
-    print(f"Attacker guesses secret length: {secret_len} bytes")
+    output_file = "attack_attempts.txt"
 
-    glue_padding = md5_padding(secret_len + len(original_message))
-    print(f"Calculated glue padding (hex): {glue_padding.hex()}")
+    # Check if the file exists and delete it
+    if os.path.exists(output_file):
+        os.remove(output_file)
 
-    forged_message = original_message + glue_padding + data_to_append
-    print(f"\nForged message (hex): {forged_message.hex()}")
+    with open(output_file, "w") as f:
+        f.write("Hash Pump Attack Attempts Log\n")
+        f.write("=" * 40 + "\n")
 
-    forged_mac = hashlib.md5(SECRET_KEY + forged_message).hexdigest()
-    print("Forged MAC:", forged_mac)
-
-    print("\nVerifying forged message and MAC on server...")
-
-    if verify(forged_message, forged_mac):
-        print("[OK] Length Extension Attack succeeded! Server accepted forged message.")
-    else:
-        print("[FAIL] Length Extension Attack failed.")
+        for key_len in range(1, 21):  # Try key lengths 1 to 20
+            try:
+                forged_mac, forged_message = hashpumpy.hashpump(
+                    intercepted_mac,
+                    intercepted_message,
+                    data_to_append,
+                    key_len
+                )
+                log_entry = (
+                    f"Trying key length: {key_len}\n"
+                    f"Forged message (bytes): {repr(forged_message)}\n"
+                    f"Forged MAC: {forged_mac}\n"
+                    f"{'-' * 40}\n"
+                )
+                print(log_entry)
+                f.write(log_entry)
+            except Exception as e:
+                error_entry = f"Error with key length {key_len}: {e}\n{'-' * 40}\n"
+                print(error_entry)
+                f.write(error_entry)
 
 if __name__ == "__main__":
-    perform_length_extension_attack()
+    perform_attack()
