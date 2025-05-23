@@ -6,7 +6,7 @@ This project demonstrates the difference between a **naive MAC implementation** 
 
 .
 ├── server.py # Server with naive MD5-based MAC (vulnerable)
-├── secure_server.py # Server using HMAC-MD5 (secure)
+├── secureserver.py # Server using HMAC-MD5 (secure)
 ├── client.py # Attacker script using hashpumpy to forge MACs
 ├── attack_attempts.txt # Auto-generated file logging attack results
 └── README.md # You're reading it!
